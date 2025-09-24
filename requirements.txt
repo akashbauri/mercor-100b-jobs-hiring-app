@@ -1,7 +1,4 @@
-# Create requirements.txt for the Streamlit app
-requirements_txt = """
 streamlit==1.28.0
 pandas==2.1.0
 plotly==5.17.0
 numpy==1.24.0
-"""
