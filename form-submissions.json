@@ -42,6 +42,44 @@
       "Docker", 
       "Microservices"
     ]
+  },
+  {
+    "name": "Sarah Chen",
+    "email": "sarah.chen@example.com",
+    "phone": "5551234567",
+    "location": "New York",
+    "submitted_at": "2025-01-29 10:15:22.000000",
+    "work_availability": [
+      "full-time"
+    ],
+    "annual_salary_expectation": {
+      "full-time": "$95000"
+    },
+    "work_experiences": [
+      {
+        "company": "Tech Corp",
+        "roleName": "Software Engineer"
+      }
+    ],
+    "education": {
+      "highest_level": "Master's Degree",
+      "degrees": [
+        {
+          "degree": "Master's Degree",
+          "subject": "Computer Science",
+          "school": "MIT",
+          "gpa": "GPA 3.8-4.0",
+          "startDate": "2020",
+          "endDate": "2022",
+          "originalSchool": "MIT",
+          "isTop50": true
+        }
+      ]
+    },
+    "skills": [
+      "Python",
+      "Machine Learning",
+      "AWS"
+    ]
   }
-  // ... and many more candidate objects
 ]
