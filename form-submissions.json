@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Clever Monkey",
+    "email": "clever-monkey@example.com",
+    "phone": "5582981474204",
+    "location": "Maceió",
+    "submitted_at": "2025-01-28 09:02:16.000000",
+    "work_availability": [
+      "full-time",
+      "part-time"
+    ],
+    "annual_salary_expectation": {
+      "full-time": "$117548"
+    },
+    "work_experiences": [
+      {
+        "company": "StarLab Digital Ventures",
+        "roleName": "Full Stack Developer"
+      },
+      {
+        "company": "OrbitalLife", 
+        "roleName": "Project Manager"
+      }
+    ],
+    "education": {
+      "highest_level": "Bachelor's Degree",
+      "degrees": [
+        {
+          "degree": "Bachelor's Degree",
+          "subject": "Computer Science",
+          "school": "International Institutions",
+          "gpa": "GPA 3.0-3.4",
+          "startDate": "2023",
+          "endDate": "2027",
+          "originalSchool": "Faculdade Descomplica",
+          "isTop50": false
+        }
+      ]
+    },
+    "skills": [
+      "Data Analysis",
+      "Docker", 
+      "Microservices"
+    ]
+  }
+  // ... and many more candidate objects
+]
