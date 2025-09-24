@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 import json
-import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime
 import re
 
 # Page configuration
@@ -22,12 +19,6 @@ st.markdown("""
         text-align: center;
         color: #1f77b4;
         margin-bottom: 2rem;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 0.5rem;
     }
     .candidate-card {
         border: 1px solid #e0e0e0;
@@ -65,23 +56,24 @@ class HiringAnalyzer:
         # Education score (30%)
         education_score = 0
         education = candidate.get('education', {})
-        highest_level = education.get('highest_level', '').lower()
-        
-        if 'phd' in highest_level or 'doctorate' in highest_level:
-            education_score = 30
-        elif 'master' in highest_level:
-            education_score = 25
-        elif 'bachelor' in highest_level:
-            education_score = 20
-        elif 'associate' in highest_level:
-            education_score = 15
-        
-        # Top school bonus
-        degrees = education.get('degrees', [])
-        for degree in degrees:
-            if degree.get('isTop50', False):
-                education_score += 5
-                break
+        if isinstance(education, dict):
+            highest_level = education.get('highest_level', '').lower()
+            
+            if 'phd' in highest_level or 'doctorate' in highest_level:
+                education_score = 30
+            elif 'master' in highest_level:
+                education_score = 25
+            elif 'bachelor' in highest_level:
+                education_score = 20
+            elif 'associate' in highest_level:
+                education_score = 15
+            
+            # Top school bonus
+            degrees = education.get('degrees', [])
+            for degree in degrees:
+                if degree.get('isTop50', False):
+                    education_score += 5
+                    break
         
         # Experience score (40%)
         experience_score = 0
@@ -111,10 +103,11 @@ class HiringAnalyzer:
         
         # High-value skills bonus
         high_value_skills = ['python', 'machine learning', 'ai', 'react', 'node', 'aws', 'docker', 'sql', 'tensorflow']
-        skills_text = ' '.join(skills).lower()
-        for skill in high_value_skills:
-            if skill in skills_text:
-                skills_score += 1
+        if skills:
+            skills_text = ' '.join(skills).lower()
+            for skill in high_value_skills:
+                if skill in skills_text:
+                    skills_score += 1
         
         total_score = min(education_score + experience_score + skills_score, 100)
         return total_score
@@ -194,7 +187,7 @@ def main():
             remaining = 5 - len(st.session_state.selected_candidates)
             st.metric("Remaining Slots", remaining)
         
-        # Quick stats charts
+        # Quick stats
         st.subheader("📈 Application Insights")
         col1, col2 = st.columns(2)
         
@@ -207,16 +200,14 @@ def main():
                 education_levels.append(level)
             
             education_counts = pd.Series(education_levels).value_counts()
-            fig = px.pie(values=education_counts.values, names=education_counts.index, 
-                        title="Education Level Distribution")
-            st.plotly_chart(fig, use_container_width=True)
+            st.subheader("Education Distribution")
+            st.bar_chart(education_counts)
         
         with col2:
             # Top locations
             location_counts = df['location'].value_counts().head(10)
-            fig = px.bar(x=location_counts.values, y=location_counts.index, 
-                        orientation='h', title="Top Candidate Locations")
-            st.plotly_chart(fig, use_container_width=True)
+            st.subheader("Top Locations")
+            st.bar_chart(location_counts)
     
     with tab2:
         st.header("👥 Candidate Pool Analysis")
@@ -256,15 +247,16 @@ def main():
             
             # Display candidate card
             is_selected = candidate['name'] in st.session_state.selected_candidates
-            card_style = "selected-candidate" if is_selected else "candidate-card"
             
             with st.container():
-                st.markdown(f'<div class="{card_style}">', unsafe_allow_html=True)
+                if is_selected:
+                    st.success(f"✅ SELECTED: {candidate['name']}")
+                else:
+                    st.info(f"👤 {candidate['name']}")
                 
                 col1, col2, col3 = st.columns([3, 1, 1])
                 
                 with col1:
-                    st.subheader(f"👤 {candidate['name']}")
                     st.write(f"📍 {candidate.get('location', 'Unknown')}")
                     st.write(f"📧 {candidate.get('email', 'Unknown')}")
                     
@@ -295,7 +287,6 @@ def main():
                 
                 with col3:
                     if is_selected:
-                        st.success("✅ Selected")
                         if st.button(f"❌ Remove", key=f"remove_{idx}"):
                             st.session_state.selected_candidates.remove(candidate['name'])
                             st.rerun()
@@ -305,8 +296,7 @@ def main():
                             st.session_state.selected_candidates.append(candidate['name'])
                             st.rerun()
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                st.write("")
+                st.divider()
     
     with tab3:
         st.header("🎯 Build Your Dream Team")
@@ -329,7 +319,7 @@ def main():
                 salary = extract_salary(candidate_dict.get('annual_salary_expectation', {}))
                 total_budget += salary
                 
-                with st.expander(f"👤 {candidate_dict['name']} - Team Member #{idx + 1}", expanded=True):
+                with st.expander(f"👤 {candidate_dict['name']} - Team Member #{idx + 1}", expanded=False):
                     col1, col2 = st.columns(2)
                     
                     with col1:
@@ -405,3 +395,82 @@ def main():
                 if isinstance(education, dict):
                     level = education.get('highest_level', '').lower()
                     if 'master' in level or 'phd' in level:
+                        justifications.append("Advanced degree holder")
+                    
+                    degrees = education.get('degrees', [])
+                    for degree in degrees:
+                        if degree.get('isTop50', False):
+                            justifications.append("Top-tier university graduate")
+                            break
+                
+                # Experience justification  
+                experiences = candidate_dict.get('work_experiences', [])
+                if len(experiences) >= 3:
+                    justifications.append("Extensive work experience")
+                
+                senior_keywords = ['senior', 'lead', 'principal', 'manager', 'director']
+                for exp in experiences:
+                    role_name = exp.get('roleName', '').lower()
+                    if any(keyword in role_name for keyword in senior_keywords):
+                        justifications.append("Leadership experience")
+                        break
+                
+                # Skills justification
+                skills = candidate_dict.get('skills', [])
+                if len(skills) >= 5:
+                    justifications.append("Diverse skill set")
+                
+                high_value_skills = ['python', 'machine learning', 'ai', 'react', 'aws', 'docker']
+                if skills:
+                    skills_text = ' '.join(skills).lower()
+                    for skill in high_value_skills:
+                        if skill in skills_text:
+                            justifications.append("High-value technical skills")
+                            break
+                
+                if justifications:
+                    st.write(f"✅ **Why chosen**: {', '.join(justifications)}")
+                else:
+                    st.write("✅ **Why chosen**: Strong overall profile and team fit")
+                
+                st.divider()
+            
+            # Generate final hiring report
+            if st.button("📋 Generate Executive Summary"):
+                st.success("🎉 Executive Hiring Report Generated!")
+                
+                total_budget = sum(
+                    extract_salary(df[df['name'] == name]['annual_salary_expectation'].iloc[0])
+                    for name in st.session_state.selected_candidates
+                )
+                
+                diversity_metrics = analyzer.get_diversity_metrics(st.session_state.selected_candidates)
+                
+                st.markdown(f"""
+                ### 📊 Executive Summary
+                
+                **Total Team Size**: {len(st.session_state.selected_candidates)} members  
+                **Total Annual Budget**: ${total_budget:,}  
+                **Average Salary**: ${total_budget//len(st.session_state.selected_candidates):,}  
+                **Geographic Diversity**: {diversity_metrics['geographic_diversity']} locations  
+                **Skill Coverage**: {diversity_metrics['skill_diversity']} unique skills  
+                
+                ### 🎯 Strategic Rationale
+                This team was selected to provide:
+                - **Technical Excellence**: Strong engineering and development capabilities
+                - **Leadership Experience**: Proven track record in senior roles  
+                - **Educational Foundation**: Mix of advanced degrees and practical experience
+                - **Global Perspective**: Diverse geographic representation
+                - **Scalable Skillset**: Skills that align with 100B+ scale ambitions
+                
+                ### 📧 Next Steps
+                1. Send offer letters to selected candidates
+                2. Schedule onboarding calls
+                3. Prepare equity packages  
+                4. Plan first team meeting
+                
+                **Ready for $100M growth! 🚀**
+                """)
+
+if __name__ == "__main__":
+    main()
