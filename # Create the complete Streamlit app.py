@@ -1,7 +1,3 @@
-# Create the complete Streamlit app for Mercor 100B Jobs Challenge
-# This will be production-ready and error-free
-
-streamlit_app_code = '''
 import streamlit as st
 import pandas as pd
 import json
@@ -49,43 +45,11 @@ st.markdown("""
 
 @st.cache_data
 def load_candidate_data():
-    """Load and process candidate data"""
+    """Load and process candidate data from form-submissions.json"""
     try:
-        # In production, this would load from the uploaded JSON file
-        # For demo purposes, we'll simulate the data structure
-        sample_data = [
-            {
-                "name": "Alex Johnson",
-                "email": "alex@example.com", 
-                "location": "San Francisco",
-                "annual_salary_expectation": {"full-time": "$120000"},
-                "work_experiences": [
-                    {"company": "Google", "roleName": "Senior Software Engineer"},
-                    {"company": "Microsoft", "roleName": "Software Engineer"}
-                ],
-                "education": {
-                    "highest_level": "Master's Degree",
-                    "degrees": [{"subject": "Computer Science", "school": "Stanford", "isTop50": True}]
-                },
-                "skills": ["Python", "Machine Learning", "AWS", "Docker"]
-            },
-            {
-                "name": "Sarah Chen", 
-                "email": "sarah@example.com",
-                "location": "New York",
-                "annual_salary_expectation": {"full-time": "$115000"},
-                "work_experiences": [
-                    {"company": "Facebook", "roleName": "Product Manager"},
-                    {"company": "Uber", "roleName": "Senior Product Manager"}
-                ],
-                "education": {
-                    "highest_level": "Master's Degree", 
-                    "degrees": [{"subject": "Business Administration", "school": "Harvard", "isTop50": True}]
-                },
-                "skills": ["Product Strategy", "Data Analysis", "A/B Testing"]
-            }
-        ]
-        return pd.DataFrame(sample_data)
+        with open('form-submissions.json', 'r', encoding='utf-8') as f:
+            candidates = json.load(f)
+        return pd.DataFrame(candidates)
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
@@ -95,60 +59,102 @@ class HiringAnalyzer:
         self.df = df
         
     def calculate_candidate_score(self, candidate):
-        """Calculate comprehensive candidate score"""
+        """Calculate comprehensive candidate score out of 100"""
         score = 0
         
         # Education score (30%)
         education_score = 0
-        if candidate.get('education', {}).get('highest_level') == "Master's Degree":
+        education = candidate.get('education', {})
+        highest_level = education.get('highest_level', '').lower()
+        
+        if 'phd' in highest_level or 'doctorate' in highest_level:
+            education_score = 30
+        elif 'master' in highest_level:
             education_score = 25
-        elif candidate.get('education', {}).get('highest_level') == "Bachelor's Degree":
+        elif 'bachelor' in highest_level:
             education_score = 20
-            
+        elif 'associate' in highest_level:
+            education_score = 15
+        
         # Top school bonus
-        degrees = candidate.get('education', {}).get('degrees', [])
+        degrees = education.get('degrees', [])
         for degree in degrees:
             if degree.get('isTop50', False):
-                education_score += 10
+                education_score += 5
                 break
         
-        # Experience score (40%) 
+        # Experience score (40%)
         experience_score = 0
         experiences = candidate.get('work_experiences', [])
-        if len(experiences) >= 3:
+        
+        # Base experience points
+        if len(experiences) >= 5:
             experience_score = 30
-        elif len(experiences) >= 2:
+        elif len(experiences) >= 3:
             experience_score = 25
+        elif len(experiences) >= 2:
+            experience_score = 20
         elif len(experiences) >= 1:
             experience_score = 15
-            
+        
         # Senior role bonus
+        senior_keywords = ['senior', 'lead', 'principal', 'manager', 'director', 'vp', 'cto', 'head']
         for exp in experiences:
-            if any(title in exp.get('roleName', '').lower() for title in ['senior', 'lead', 'principal', 'manager', 'director']):
+            role_name = exp.get('roleName', '').lower()
+            if any(keyword in role_name for keyword in senior_keywords):
                 experience_score += 10
                 break
         
         # Skills score (30%)
         skills = candidate.get('skills', [])
-        skills_score = min(len(skills) * 3, 30)
+        skills_score = min(len(skills) * 2, 25)
         
-        total_score = education_score + experience_score + skills_score
-        return min(total_score, 100)
+        # High-value skills bonus
+        high_value_skills = ['python', 'machine learning', 'ai', 'react', 'node', 'aws', 'docker', 'sql', 'tensorflow']
+        skills_text = ' '.join(skills).lower()
+        for skill in high_value_skills:
+            if skill in skills_text:
+                skills_score += 1
+        
+        total_score = min(education_score + experience_score + skills_score, 100)
+        return total_score
     
-    def get_diversity_metrics(self, candidates):
-        """Calculate diversity metrics"""
-        locations = [c.get('location', 'Unknown') for c in candidates]
-        unique_locations = len(set(locations))
+    def get_diversity_metrics(self, candidate_names):
+        """Calculate diversity metrics for selected candidates"""
+        if not candidate_names:
+            return {'geographic_diversity': 0, 'skill_diversity': 0}
+            
+        selected_candidates = self.df[self.df['name'].isin(candidate_names)]
         
-        skills = []
-        for c in candidates:
-            skills.extend(c.get('skills', []))
-        unique_skills = len(set(skills))
+        # Geographic diversity
+        locations = selected_candidates['location'].unique()
+        geographic_diversity = len(locations)
+        
+        # Skill diversity
+        all_skills = []
+        for _, candidate in selected_candidates.iterrows():
+            skills = candidate.get('skills', [])
+            if isinstance(skills, list):
+                all_skills.extend(skills)
+        skill_diversity = len(set(all_skills))
         
         return {
-            'geographic_diversity': unique_locations,
-            'skill_diversity': unique_skills
+            'geographic_diversity': geographic_diversity,
+            'skill_diversity': skill_diversity,
+            'unique_skills': list(set(all_skills)),
+            'team_locations': list(locations)
         }
+
+def extract_salary(salary_dict):
+    """Extract numeric salary from salary dictionary"""
+    if isinstance(salary_dict, dict):
+        salary_str = salary_dict.get('full-time', '$0')
+    else:
+        salary_str = str(salary_dict)
+    
+    # Extract numbers from salary string
+    numbers = re.findall(r'\d+', salary_str)
+    return int(''.join(numbers)) if numbers else 0
 
 def main():
     # Header
@@ -157,14 +163,13 @@ def main():
     
     # Load data
     df = load_candidate_data()
-    analyzer = HiringAnalyzer(df)
     
     if df.empty:
-        st.error("No candidate data available. Please check data loading.")
+        st.error("❌ Could not load candidate data. Please ensure 'form-submissions.json' is in the repository.")
+        st.info("📁 Upload your form-submissions.json file to the GitHub repository")
         return
     
-    # Sidebar for filters
-    st.sidebar.header("🔍 Hiring Filters")
+    analyzer = HiringAnalyzer(df)
     
     # Initialize session state for selections
     if 'selected_candidates' not in st.session_state:
@@ -181,9 +186,7 @@ def main():
         with col1:
             st.metric("Total Applicants", len(df))
         with col2:
-            avg_salary = df['annual_salary_expectation'].apply(
-                lambda x: int(re.sub(r'[^0-9]', '', str(x.get('full-time', '$0')))) if isinstance(x, dict) else 0
-            ).mean()
+            avg_salary = df['annual_salary_expectation'].apply(extract_salary).mean()
             st.metric("Avg Salary Expectation", f"${avg_salary:,.0f}")
         with col3:
             st.metric("Selected for Team", len(st.session_state.selected_candidates))
@@ -191,80 +194,115 @@ def main():
             remaining = 5 - len(st.session_state.selected_candidates)
             st.metric("Remaining Slots", remaining)
         
-        # Quick stats
+        # Quick stats charts
         st.subheader("📈 Application Insights")
         col1, col2 = st.columns(2)
         
         with col1:
             # Education distribution
-            education_data = df['education'].apply(lambda x: x.get('highest_level', 'Unknown') if isinstance(x, dict) else 'Unknown').value_counts()
-            fig = px.pie(values=education_data.values, names=education_data.index, title="Education Distribution")
+            education_levels = []
+            for _, candidate in df.iterrows():
+                education = candidate.get('education', {})
+                level = education.get('highest_level', 'Unknown') if isinstance(education, dict) else 'Unknown'
+                education_levels.append(level)
+            
+            education_counts = pd.Series(education_levels).value_counts()
+            fig = px.pie(values=education_counts.values, names=education_counts.index, 
+                        title="Education Level Distribution")
             st.plotly_chart(fig, use_container_width=True)
         
         with col2:
-            # Geographic distribution  
-            location_data = df['location'].value_counts().head(10)
-            fig = px.bar(x=location_data.values, y=location_data.index, orientation='h', title="Top Locations")
+            # Top locations
+            location_counts = df['location'].value_counts().head(10)
+            fig = px.bar(x=location_counts.values, y=location_counts.index, 
+                        orientation='h', title="Top Candidate Locations")
             st.plotly_chart(fig, use_container_width=True)
     
     with tab2:
-        st.header("👥 Candidate Pool")
+        st.header("👥 Candidate Pool Analysis")
         
-        # Search and filter
+        # Search functionality
         search_term = st.text_input("🔍 Search candidates by name, skills, or company")
         
+        # Scoring and filtering
+        candidates_with_scores = []
         for idx, candidate in df.iterrows():
             candidate_dict = candidate.to_dict()
+            score = analyzer.calculate_candidate_score(candidate_dict)
+            candidates_with_scores.append({
+                'index': idx,
+                'candidate': candidate_dict,
+                'score': score
+            })
+        
+        # Sort by score
+        candidates_with_scores.sort(key=lambda x: x['score'], reverse=True)
+        
+        # Display candidates
+        for item in candidates_with_scores:
+            candidate = item['candidate']
+            score = item['score']
+            idx = item['index']
             
-            # Search functionality
+            # Search filter
             if search_term:
                 search_fields = [
-                    str(candidate_dict.get('name', '')).lower(),
-                    str(candidate_dict.get('skills', [])).lower(),
-                    str(candidate_dict.get('work_experiences', [])).lower()
+                    str(candidate.get('name', '')).lower(),
+                    str(candidate.get('skills', [])).lower(),
+                    str(candidate.get('work_experiences', [])).lower()
                 ]
                 if not any(search_term.lower() in field for field in search_fields):
                     continue
             
-            # Calculate score
-            score = analyzer.calculate_candidate_score(candidate_dict)
-            
             # Display candidate card
-            is_selected = candidate_dict['name'] in st.session_state.selected_candidates
-            card_class = "selected-candidate" if is_selected else "candidate-card"
+            is_selected = candidate['name'] in st.session_state.selected_candidates
+            card_style = "selected-candidate" if is_selected else "candidate-card"
             
             with st.container():
-                st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
+                st.markdown(f'<div class="{card_style}">', unsafe_allow_html=True)
                 
                 col1, col2, col3 = st.columns([3, 1, 1])
                 
                 with col1:
-                    st.subheader(f"👤 {candidate_dict['name']}")
-                    st.write(f"📍 {candidate_dict['location']}")
+                    st.subheader(f"👤 {candidate['name']}")
+                    st.write(f"📍 {candidate.get('location', 'Unknown')}")
+                    st.write(f"📧 {candidate.get('email', 'Unknown')}")
                     
-                    # Experience
-                    experiences = candidate_dict.get('work_experiences', [])
-                    if experiences:
+                    # Recent experience
+                    experiences = candidate.get('work_experiences', [])
+                    if experiences and len(experiences) > 0:
                         recent_exp = experiences[0]
                         st.write(f"💼 {recent_exp.get('roleName', 'N/A')} at {recent_exp.get('company', 'N/A')}")
                     
-                    # Skills
-                    skills = candidate_dict.get('skills', [])
+                    # Skills preview
+                    skills = candidate.get('skills', [])
                     if skills:
-                        st.write(f"🛠️ **Skills**: {', '.join(skills[:5])}")
+                        skills_preview = ', '.join(skills[:4])
+                        if len(skills) > 4:
+                            skills_preview += f" (+{len(skills)-4} more)"
+                        st.write(f"🛠️ **Skills**: {skills_preview}")
                 
                 with col2:
                     st.metric("AI Score", f"{score}/100")
-                    salary = candidate_dict.get('annual_salary_expectation', {}).get('full-time', 'N/A')
-                    st.write(f"💰 {salary}")
+                    salary = extract_salary(candidate.get('annual_salary_expectation', {}))
+                    st.write(f"💰 ${salary:,}")
+                    
+                    # Education
+                    education = candidate.get('education', {})
+                    if isinstance(education, dict):
+                        level = education.get('highest_level', 'N/A')
+                        st.write(f"🎓 {level}")
                 
                 with col3:
-                    button_text = "✅ Selected" if is_selected else "➕ Select"
-                    button_disabled = is_selected or len(st.session_state.selected_candidates) >= 5
-                    
-                    if st.button(button_text, key=f"select_{idx}", disabled=button_disabled):
-                        if not is_selected and len(st.session_state.selected_candidates) < 5:
-                            st.session_state.selected_candidates.append(candidate_dict['name'])
+                    if is_selected:
+                        st.success("✅ Selected")
+                        if st.button(f"❌ Remove", key=f"remove_{idx}"):
+                            st.session_state.selected_candidates.remove(candidate['name'])
+                            st.rerun()
+                    else:
+                        can_select = len(st.session_state.selected_candidates) < 5
+                        if st.button("➕ Select", key=f"select_{idx}", disabled=not can_select):
+                            st.session_state.selected_candidates.append(candidate['name'])
                             st.rerun()
                 
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -274,147 +312,96 @@ def main():
         st.header("🎯 Build Your Dream Team")
         
         if not st.session_state.selected_candidates:
-            st.info("No candidates selected yet. Go to the Candidates tab to start building your team!")
+            st.info("👈 No candidates selected yet. Go to the **Candidates** tab to start building your team!")
         else:
-            st.success(f"✅ {len(st.session_state.selected_candidates)}/5 positions filled")
+            st.success(f"✅ Team Progress: {len(st.session_state.selected_candidates)}/5 positions filled")
+            
+            # Progress bar
+            progress = len(st.session_state.selected_candidates) / 5
+            st.progress(progress)
             
             # Display selected team
             selected_data = df[df['name'].isin(st.session_state.selected_candidates)]
             
-            for idx, candidate in selected_data.iterrows():
+            total_budget = 0
+            for idx, (_, candidate) in enumerate(selected_data.iterrows()):
                 candidate_dict = candidate.to_dict()
+                salary = extract_salary(candidate_dict.get('annual_salary_expectation', {}))
+                total_budget += salary
                 
-                with st.expander(f"👤 {candidate_dict['name']} - Team Member #{st.session_state.selected_candidates.index(candidate_dict['name']) + 1}"):
+                with st.expander(f"👤 {candidate_dict['name']} - Team Member #{idx + 1}", expanded=True):
                     col1, col2 = st.columns(2)
                     
                     with col1:
-                        st.write(f"**Email**: {candidate_dict['email']}")
-                        st.write(f"**Location**: {candidate_dict['location']}")
+                        st.write(f"**Email**: {candidate_dict.get('email', 'N/A')}")
+                        st.write(f"**Location**: {candidate_dict.get('location', 'N/A')}")
+                        st.write(f"**Salary**: ${salary:,}")
                         
+                        # Experience summary
                         experiences = candidate_dict.get('work_experiences', [])
                         if experiences:
-                            st.write("**Experience**:")
-                            for exp in experiences[:3]:
+                            st.write("**Recent Experience**:")
+                            for exp in experiences[:2]:
                                 st.write(f"• {exp.get('roleName', 'N/A')} at {exp.get('company', 'N/A')}")
                     
                     with col2:
-                        salary = candidate_dict.get('annual_salary_expectation', {}).get('full-time', 'N/A')
-                        st.write(f"**Salary Expectation**: {salary}")
-                        
+                        # Skills
                         skills = candidate_dict.get('skills', [])
                         if skills:
-                            st.write(f"**Skills**: {', '.join(skills)}")
+                            st.write(f"**Skills**: {', '.join(skills[:6])}")
+                            if len(skills) > 6:
+                                st.write(f"*...and {len(skills)-6} more*")
                         
+                        # Education
                         education = candidate_dict.get('education', {})
-                        if education:
-                            st.write(f"**Education**: {education.get('highest_level', 'N/A')}")
-                    
-                    if st.button(f"❌ Remove {candidate_dict['name']}", key=f"remove_{idx}"):
-                        st.session_state.selected_candidates.remove(candidate_dict['name'])
-                        st.rerun()
+                        if isinstance(education, dict):
+                            level = education.get('highest_level', 'N/A')
+                            st.write(f"**Education**: {level}")
+                        
+                        # AI Score
+                        score = analyzer.calculate_candidate_score(candidate_dict)
+                        st.write(f"**AI Score**: {score}/100")
             
-            # Team composition analysis
+            # Team metrics
             if len(st.session_state.selected_candidates) > 0:
-                st.subheader("📊 Team Composition Analysis")
+                st.subheader("📊 Team Composition Metrics")
                 
-                selected_candidates_data = []
-                for name in st.session_state.selected_candidates:
-                    candidate_row = df[df['name'] == name].iloc[0].to_dict()
-                    selected_candidates_data.append(candidate_row)
+                diversity_metrics = analyzer.get_diversity_metrics(st.session_state.selected_candidates)
                 
-                diversity_metrics = analyzer.get_diversity_metrics(selected_candidates_data)
-                
-                col1, col2, col3 = st.columns(3)
+                col1, col2, col3, col4 = st.columns(4)
                 with col1:
-                    st.metric("Geographic Diversity", diversity_metrics['geographic_diversity'])
+                    st.metric("Total Budget", f"${total_budget:,}")
                 with col2:
-                    st.metric("Skill Diversity", diversity_metrics['skill_diversity'])
+                    st.metric("Geographic Diversity", diversity_metrics['geographic_diversity'])
                 with col3:
-                    avg_score = sum(analyzer.calculate_candidate_score(c) for c in selected_candidates_data) / len(selected_candidates_data)
-                    st.metric("Avg Team Score", f"{avg_score:.0f}/100")
+                    st.metric("Skill Diversity", diversity_metrics['skill_diversity'])
+                with col4:
+                    avg_score = sum(analyzer.calculate_candidate_score(df[df['name'] == name].iloc[0].to_dict()) 
+                                  for name in st.session_state.selected_candidates) / len(st.session_state.selected_candidates)
+                    st.metric("Team Avg Score", f"{avg_score:.0f}/100")
     
     with tab4:
-        st.header("📈 Hiring Analytics")
+        st.header("📈 Final Hiring Analytics & Report")
         
-        if st.session_state.selected_candidates:
-            # Final team analysis
-            selected_data = df[df['name'].isin(st.session_state.selected_candidates)]
-            
+        if not st.session_state.selected_candidates:
+            st.info("Complete your team selection first to generate the final report!")
+        else:
+            # Generate hiring justifications
             st.subheader("🏆 Final Team Selection Justification")
             
-            for idx, candidate in selected_data.iterrows():
+            selected_data = df[df['name'].isin(st.session_state.selected_candidates)]
+            
+            for idx, (_, candidate) in enumerate(selected_data.iterrows()):
                 candidate_dict = candidate.to_dict()
                 score = analyzer.calculate_candidate_score(candidate_dict)
                 
-                st.write(f"**{candidate_dict['name']}** (Score: {score}/100)")
+                st.markdown(f"### {idx + 1}. **{candidate_dict['name']}** (AI Score: {score}/100)")
                 
-                # Justification logic
+                # Generate specific justifications
                 justifications = []
                 
                 # Education justification
                 education = candidate_dict.get('education', {})
-                if education.get('highest_level') == "Master's Degree":
-                    justifications.append("Advanced degree holder")
-                
-                degrees = education.get('degrees', [])
-                for degree in degrees:
-                    if degree.get('isTop50', False):
-                        justifications.append("Top-tier university graduate")
-                        break
-                
-                # Experience justification  
-                experiences = candidate_dict.get('work_experiences', [])
-                if len(experiences) >= 3:
-                    justifications.append("Extensive work experience")
-                
-                for exp in experiences:
-                    if any(title in exp.get('roleName', '').lower() for title in ['senior', 'lead', 'principal', 'manager']):
-                        justifications.append("Leadership experience")
-                        break
-                
-                # Skills justification
-                skills = candidate_dict.get('skills', [])
-                if len(skills) >= 5:
-                    justifications.append("Diverse skill set")
-                
-                st.write(f"✅ **Why chosen**: {', '.join(justifications)}")
-                st.write("---")
-            
-            # Generate final hiring report
-            if st.button("📋 Generate Final Hiring Report"):
-                st.success("🎉 Hiring Report Generated!")
-                
-                total_budget = sum(
-                    int(re.sub(r'[^0-9]', '', str(df[df['name'] == name]['annual_salary_expectation'].iloc[0].get('full-time', '$0'))))
-                    for name in st.session_state.selected_candidates
-                )
-                
-                st.markdown(f"""
-                ### 📊 Executive Summary
-                
-                **Total Team Size**: 5 members  
-                **Total Annual Budget**: ${total_budget:,}  
-                **Average Salary**: ${total_budget//5:,}  
-                **Geographic Diversity**: {diversity_metrics['geographic_diversity']} locations  
-                **Skill Coverage**: {diversity_metrics['skill_diversity']} unique skills  
-                
-                ### 🎯 Strategic Rationale
-                This team was selected to provide:
-                - **Technical Excellence**: Strong engineering and development capabilities
-                - **Leadership Experience**: Proven track record in senior roles  
-                - **Educational Foundation**: Mix of advanced degrees and practical experience
-                - **Global Perspective**: Diverse geographic representation
-                - **Scalable Skillset**: Skills that align with 100B+ scale ambitions
-                
-                ### 📧 Next Steps
-                1. Send offer letters to selected candidates
-                2. Schedule onboarding calls
-                3. Prepare equity packages  
-                4. Plan first team meeting
-                """)
-        else:
-            st.info("Select your team first to see analytics!")
-
-if __name__ == "__main__":
-    main()
-'''
+                if isinstance(education, dict):
+                    level = education.get('highest_level', '').lower()
+                    if 'master' in level or 'phd' in level:
