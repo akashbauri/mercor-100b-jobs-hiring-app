@@ -1,218 +1,83 @@
-[
-  {
-    "name": "Alex Johnson",
-    "email": "alex.johnson@example.com",
-    "phone": "5551234567",
-    "location": "San Francisco",
-    "submitted_at": "2025-01-28 09:00:00.000000",
-    "work_availability": ["full-time"],
-    "annual_salary_expectation": {"full-time": "$120000"},
-    "work_experiences": [
-      {"company": "Google", "roleName": "Senior Software Engineer"},
-      {"company": "Microsoft", "roleName": "Software Engineer"}
-    ],
-    "education": {
-      "highest_level": "Master's Degree",
-      "degrees": [{
-        "degree": "Master's Degree",
-        "subject": "Computer Science",
-        "school": "Stanford University",
-        "gpa": "GPA 3.8-4.0",
-        "startDate": "2020",
-        "endDate": "2022",
-        "originalSchool": "Stanford University",
-        "isTop50": true
-      }]
-    },
-    "skills": ["Python", "Machine Learning", "AWS", "Docker", "React"]
+,
+{
+  "name": "Priya Sharma",
+  "email": "priya.sharma@example.com",
+  "phone": "9988776655",
+  "location": "Bangalore, India",
+  "submitted_at": "2025-01-29 09:30:00.000000",
+  "work_availability": ["full-time"],
+  "annual_salary_expectation": {"full-time": "₹2,400,000"},
+  "work_experiences": [
+    {"company": "Infosys", "roleName": "Senior Data Scientist"},
+    {"company": "TCS", "roleName": "Machine Learning Engineer"}
+  ],
+  "education": {
+    "highest_level": "Master's Degree",
+    "degrees": [{
+      "degree": "M.Tech",
+      "subject": "Computer Science",
+      "school": "IIT Delhi",
+      "gpa": "GPA 8.8-9.0",
+      "startDate": "2019",
+      "endDate": "2021",
+      "originalSchool": "IIT Delhi",
+      "isTop50": true
+    }]
   },
-  {
-    "name": "Sarah Chen",
-    "email": "sarah.chen@example.com", 
-    "phone": "5559876543",
-    "location": "New York",
-    "submitted_at": "2025-01-28 10:00:00.000000",
-    "work_availability": ["full-time"],
-    "annual_salary_expectation": {"full-time": "$115000"},
-    "work_experiences": [
-      {"company": "Facebook", "roleName": "Product Manager"},
-      {"company": "Uber", "roleName": "Senior Product Manager"}
-    ],
-    "education": {
-      "highest_level": "Master's Degree",
-      "degrees": [{
-        "degree": "Master's Degree",
-        "subject": "Business Administration",
-        "school": "Harvard Business School",
-        "gpa": "GPA 3.7-3.9",
-        "startDate": "2018",
-        "endDate": "2020",
-        "originalSchool": "Harvard Business School",
-        "isTop50": true
-      }]
-    },
-    "skills": ["Product Strategy", "Data Analysis", "A/B Testing", "SQL"]
+  "skills": ["Python", "Machine Learning", "TensorFlow", "SQL", "Azure"]
+},
+{
+  "name": "Rahul Verma",
+  "email": "rahul.verma@example.com",
+  "phone": "9123456789",
+  "location": "Chennai, India",
+  "submitted_at": "2025-01-29 10:15:00.000000",
+  "work_availability": ["full-time"],
+  "annual_salary_expectation": {"full-time": "₹1,850,000"},
+  "work_experiences": [
+    {"company": "Zoho Corp.", "roleName": "AI Software Engineer"},
+    {"company": "HCL", "roleName": "Software Engineer"}
+  ],
+  "education": {
+    "highest_level": "Bachelor's Degree",
+    "degrees": [{
+      "degree": "B.Tech",
+      "subject": "Electronics & Comm.",
+      "school": "NIT Trichy",
+      "gpa": "GPA 8.5-9.0",
+      "startDate": "2016",
+      "endDate": "2020",
+      "originalSchool": "NIT Trichy",
+      "isTop50": true
+    }]
   },
-  {
-    "name": "David Rodriguez",
-    "email": "david.rodriguez@example.com",
-    "phone": "5556547890",
-    "location": "Austin",
-    "submitted_at": "2025-01-28 11:00:00.000000",
-    "work_availability": ["full-time", "part-time"],
-    "annual_salary_expectation": {"full-time": "$95000"},
-    "work_experiences": [
-      {"company": "Tesla", "roleName": "Full Stack Developer"},
-      {"company": "SpaceX", "roleName": "Software Engineer"}
-    ],
-    "education": {
-      "highest_level": "Bachelor's Degree",
-      "degrees": [{
-        "degree": "Bachelor's Degree",
-        "subject": "Computer Science",
-        "school": "University of Texas at Austin",
-        "gpa": "GPA 3.5-3.7",
-        "startDate": "2016",
-        "endDate": "2020",
-        "originalSchool": "University of Texas at Austin",
-        "isTop50": false
-      }]
-    },
-    "skills": ["JavaScript", "Node.js", "React", "Python", "PostgreSQL"]
+  "skills": ["Java", "Deep Learning", "React", "Docker", "AWS"]
+},
+{
+  "name": "Sangeetha R",
+  "email": "sangeetha.r@example.com",
+  "phone": "9876543210",
+  "location": "Hyderabad, India",
+  "submitted_at": "2025-01-29 11:00:00.000000",
+  "work_availability": ["full-time"],
+  "annual_salary_expectation": {"full-time": "₹2,200,000"},
+  "work_experiences": [
+    {"company": "Amazon India", "roleName": "Data Analyst"},
+    {"company": "DRDO", "roleName": "AI Researcher"}
+  ],
+  "education": {
+    "highest_level": "Master's Degree",
+    "degrees": [{
+      "degree": "MSc",
+      "subject": "Data Science",
+      "school": "IIIT Hyderabad",
+      "gpa": "GPA 8.7-8.9",
+      "startDate": "2018",
+      "endDate": "2020",
+      "originalSchool": "IIIT Hyderabad",
+      "isTop50": true
+    }]
   },
-  {
-    "name": "Emily Zhang",
-    "email": "emily.zhang@example.com",
-    "phone": "5554321098",
-    "location": "Seattle",
-    "submitted_at": "2025-01-28 12:00:00.000000", 
-    "work_availability": ["full-time"],
-    "annual_salary_expectation": {"full-time": "$110000"},
-    "work_experiences": [
-      {"company": "Amazon", "roleName": "Senior Data Scientist"},
-      {"company": "Netflix", "roleName": "Data Scientist"}
-    ],
-    "education": {
-      "highest_level": "PhD",
-      "degrees": [{
-        "degree": "PhD",
-        "subject": "Statistics",
-        "school": "University of Washington",
-        "gpa": "GPA 3.9-4.0",
-        "startDate": "2017",
-        "endDate": "2022",
-        "originalSchool": "University of Washington",
-        "isTop50": true
-      }]
-    },
-    "skills": ["Python", "R", "Machine Learning", "TensorFlow", "Statistics"]
-  },
-  {
-    "name": "Michael Brown",
-    "email": "michael.brown@example.com",
-    "phone": "5557654321",
-    "location": "Boston",
-    "submitted_at": "2025-01-28 13:00:00.000000",
-    "work_availability": ["full-time"],
-    "annual_salary_expectation": {"full-time": "$105000"},
-    "work_experiences": [
-      {"company": "IBM", "roleName": "Principal Engineer"},
-      {"company": "Oracle", "roleName": "Senior Software Engineer"}
-    ],
-    "education": {
-      "highest_level": "Master's Degree",
-      "degrees": [{
-        "degree": "Master's Degree",
-        "subject": "Software Engineering",
-        "school": "MIT",
-        "gpa": "GPA 3.8-4.0",
-        "startDate": "2015",
-        "endDate": "2017",
-        "originalSchool": "MIT",
-        "isTop50": true
-      }]
-    },
-    "skills": ["Java", "Kubernetes", "Microservices", "Spring Boot", "Docker"]
-  },
-  {
-    "name": "Lisa Wang",
-    "email": "lisa.wang@example.com",
-    "phone": "5558765432",
-    "location": "Los Angeles",
-    "submitted_at": "2025-01-28 14:00:00.000000",
-    "work_availability": ["full-time"],
-    "annual_salary_expectation": {"full-time": "$125000"},
-    "work_experiences": [
-      {"company": "Apple", "roleName": "Senior iOS Developer"},
-      {"company": "Snapchat", "roleName": "Mobile Engineer"}
-    ],
-    "education": {
-      "highest_level": "Bachelor's Degree",
-      "degrees": [{
-        "degree": "Bachelor's Degree",
-        "subject": "Computer Science",
-        "school": "UCLA",
-        "gpa": "GPA 3.6-3.8",
-        "startDate": "2014",
-        "endDate": "2018",
-        "originalSchool": "UCLA",
-        "isTop50": true
-      }]
-    },
-    "skills": ["Swift", "iOS Development", "Objective-C", "React Native"]
-  },
-  {
-    "name": "James Wilson",
-    "email": "james.wilson@example.com",
-    "phone": "5552468135",
-    "location": "Chicago",
-    "submitted_at": "2025-01-28 15:00:00.000000",
-    "work_availability": ["full-time", "part-time"],
-    "annual_salary_expectation": {"full-time": "$90000"},
-    "work_experiences": [
-      {"company": "Salesforce", "roleName": "DevOps Engineer"},
-      {"company": "LinkedIn", "roleName": "Site Reliability Engineer"}
-    ],
-    "education": {
-      "highest_level": "Bachelor's Degree",
-      "degrees": [{
-        "degree": "Bachelor's Degree",
-        "subject": "Information Technology",
-        "school": "Northwestern University",
-        "gpa": "GPA 3.4-3.6",
-        "startDate": "2015",
-        "endDate": "2019",
-        "originalSchool": "Northwestern University",
-        "isTop50": true
-      }]
-    },
-    "skills": ["AWS", "Terraform", "Jenkins", "Kubernetes", "Python"]
-  },
-  {
-    "name": "Maria Garcia",
-    "email": "maria.garcia@example.com",
-    "phone": "5559753186",
-    "location": "Miami",
-    "submitted_at": "2025-01-28 16:00:00.000000",
-    "work_availability": ["full-time"],
-    "annual_salary_expectation": {"full-time": "$100000"},
-    "work_experiences": [
-      {"company": "Adobe", "roleName": "UX Designer"},
-      {"company": "Airbnb", "roleName": "Senior UX Designer"}
-    ],
-    "education": {
-      "highest_level": "Master's Degree",
-      "degrees": [{
-        "degree": "Master's Degree",
-        "subject": "Design",
-        "school": "Art Center College of Design",
-        "gpa": "GPA 3.7-3.9",
-        "startDate": "2016",
-        "endDate": "2018",
-        "originalSchool": "Art Center College of Design",
-        "isTop50": false
-      }]
-    },
-    "skills": ["Figma", "Adobe Creative Suite", "User Research", "Prototyping"]
-  }
+  "skills": ["Python", "NLP", "Power BI", "SQL", "Machine Learning", "Keras"]
+}
 ]
